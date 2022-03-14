@@ -106,6 +106,7 @@
 	var drawing = false;
 
 	// cached regexps, better performance
+	var regFindComments = /\/\* ([^*]|\*+[^*\/])* \*+\//g;
 	var regFindSetters = /([\s{;])(--([A-Za-z0-9-_]*)\s*:([^;!}{]+)(!important)?)(?=\s*([;}]|$))/g;
 	var regFindGetters = /([{;]\s*)([A-Za-z0-9-_]+\s*:[^;}{]*var\([^!;}{]+)(!important)?(?=\s*([;}$]|$))/g;
 	var regRuleIEGetters = /-ieVar-([^:]+):/g
@@ -164,7 +165,7 @@
 			return '/*\n @property ... removed \n*'+'/';
 		});
 		*/
-		return css.replace(regFindSetters, function($0, $1, $2, $3, $4, important){
+		return css.replace(regFindComments, '').replace(regFindSetters, function($0, $1, $2, $3, $4, important){
 			return $1+'-ie-'+(important?'❗':'')+$3+':'+encodeValue($4);
 		}).replace(regFindGetters, function($0, $1, $2, important){
 			return $1+'-ieVar-'+(important?'❗':'')+$2+'; '+$2; // keep the original, so chaining works "--x:var(--y)"
