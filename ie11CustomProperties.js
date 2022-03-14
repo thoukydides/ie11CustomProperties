@@ -435,20 +435,20 @@
 					insideCalc = level;
 				}
 			}
-			if (char === ')' && openedLevel === level) {
-				let variable = str.substring(lastPoint, i-1).trim(), fallback;
-				let x = variable.indexOf(',');
-				if (x!==-1) {
-					fallback = variable.slice(x+1);
-					variable = variable.slice(0,x);
-				}
-				newStr += cb(variable, fallback, insideCalc);
-				lastPoint = i;
-				openedLevel = null;
-			}
 			if (char === ')') {
-				--level;
+				if (openedLevel === level) {
+					let variable = str.substring(lastPoint, i-1).trim(), fallback;
+					let x = variable.indexOf(',');
+					if (x!==-1) {
+						fallback = variable.slice(x+1);
+						variable = variable.slice(0,x);
+					}
+					newStr += cb(variable, fallback, insideCalc);
+					lastPoint = i;
+					openedLevel = null;
+				}
 				if (insideCalc === level) insideCalc = null;
+				--level;
 			}
 		}
 		newStr += str.substring(lastPoint);
@@ -457,7 +457,7 @@
 	function styleComputeValueWidthVars(style, valueWithVars, details){
 		return findVars(valueWithVars, function(variable, fallback, insideCalc){
 			var value = style.getPropertyValue(variable);
-			if (insideCalc) value = value.replace(/^calc\(/, '('); // prevent nested calc
+			if (insideCalc) value = value.replace(/calc\(/g, '('); // prevent nested calc
 			if (details && style.lastPropertyServedBy !== document.documentElement) details.allByRoot = false;
 			if (value==='' && fallback) value = styleComputeValueWidthVars(style, fallback, details);
 			return value;
